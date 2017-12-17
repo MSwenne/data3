@@ -1,6 +1,6 @@
 CC = g++
 
-Headers = expr.h exprtree.h tree.h node.h
+Headers = Automaton.h expr.h exprtree.h tree.h node.h
 
 CompileParms = -c -std=c++11 -Wall -Wextra
 

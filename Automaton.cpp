@@ -5,7 +5,78 @@
 // TODO (voor studenten - deel 1): VOEG HIER DE IMPLEMENTATIES VAN DE OPERATIES IN Automato.h TOE
 
 
+void Automaton::addState(const State state){
+	states.insert(state);
+}
 
+void Automaton::addTransition(const State from, const BitVector label, const State to){
+	std::map<BitVector, std::set<State> > toMap;
+	std::set<State> toState;
+	std::map<State, std::map<BitVector, std::set<State> > >::iterator it;
+	std::map<BitVector, std::set<State> >::iterator setIt;
+	it = transitions.find(from);
+	if(it == transitions.end()){
+		toState.insert(to);
+		toMap[label] = toState;
+		transitions[from] = toMap;
+		return;
+	}
+	toMap = it->second;
+	setIt = toMap.find(label);
+	if(setIt != toMap.end()){
+		setIt->second.insert(to);
+		return;
+	}
+	toState.insert(to);
+	toMap[label] = toState;
+
+}
+
+void Automaton::markInitial(const State state){
+	initialStates.insert(state);
+}
+
+void Automaton::markFinal(const State state){
+	finalStates.insert(state);
+}
+
+void Automaton::parseInput(const std::list<BitVector> input){
+
+}
+
+bool Automaton::inFinalState() const{
+	std::set<State>::iterator itcur;
+	std::set<State>::iterator itfin;
+
+	for(itcur = currentStates.begin(); itcur != currentStates.end(); itcur++){
+		for(itfin = finalStates.begin(); itfin != finalStates.end(); itfin++){
+			if(*itcur == *itfin){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void Automaton::intersect(Automaton& fa1, Automaton& fa2){
+
+}
+
+void Automaton::addToAlphabet(unsigned varnr){
+
+}
+
+void Automaton::complement(Automaton& fa){
+
+}
+
+void Automaton::project(const unsigned variable){
+
+}
+
+void Automaton::makeDeterministic(Automaton& fa){
+
+}
 
 void Automaton::printStates(std::ostream &str, const std::set<State> s) {
     str << "{";
