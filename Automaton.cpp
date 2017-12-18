@@ -2,7 +2,7 @@
 
 
 
-// TODO (voor studenten - deel 1): VOEG HIER DE IMPLEMENTATIES VAN DE OPERATIES IN Automato.h TOE
+// TODO (voor studenten - deel 1): VOEG HIER DE IMPLEMENTATIES VAN DE OPERATIES IN Automaton.h TOE
 
 
 void Automaton::addState(const State state){
@@ -14,6 +14,12 @@ void Automaton::addTransition(const State from, const BitVector label, const Sta
 	std::set<State> toState;
 	std::map<State, std::map<BitVector, std::set<State> > >::iterator it;
 	std::map<BitVector, std::set<State> >::iterator setIt;
+
+	if(alphabet.empty()){
+		for(std::map<unsigned,bool>::const_iterator i= label.begin(); i!=label.end(); i++)
+			alphabet.insert(i->first);
+	}
+
 	it = transitions.find(from);
 	if(it == transitions.end()){
 		toState.insert(to);
