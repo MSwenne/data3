@@ -27,6 +27,7 @@ void Automaton::addTransition(const State from, const BitVector label, const Sta
 		setIt->second.insert(to);
 		return;
 	}
+
 	toState.insert(to);
 	toMap[label] = toState;
 
@@ -41,7 +42,14 @@ void Automaton::markFinal(const State state){
 }
 
 void Automaton::parseInput(const std::list<BitVector> input){
-
+	std::list<BitVector>::const_iterator it;
+	currentStates = initialStates;
+	for (it = input.begin(); it != input.end(); ++it){
+		next(*it);
+	}
+	if(!inFinalState()){
+		std::cout << "not in final!" << std::endl;
+	}
 }
 
 bool Automaton::inFinalState() const{
@@ -85,6 +93,25 @@ void Automaton::printStates(std::ostream &str, const std::set<State> s) {
     }
     str << "}";
     
+}
+
+
+void Automaton::next(const BitVector input){
+	std::set<State>::iterator itcur;
+	std::set<State> nextStates;
+
+	for(itcur = currentStates.begin(); itcur != currentStates.end(); itcur++){
+		std::set<State> next = transitions[*itcur][input];
+
+		std::set<State>::iterator itnext;
+		for(itnext = next.begin(); itnext != next.end(); itnext++){
+			nextStates.insert(*itnext);
+		}
+	}
+
+	currentStates = nextStates;
+
+
 }
 
 void Automaton::printTransitionLabel(std::ostream &str, const BitVector t) {
