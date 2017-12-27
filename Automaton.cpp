@@ -73,25 +73,71 @@ bool Automaton::inFinalState() const{
 }
 
 void Automaton::intersect(Automaton& fa1, Automaton& fa2){
-	std::set<State> Q, d, F, remain;
-	std::set<State> states1 = fa1->initialStates;	
-	std::set<State> states2 = fa2->initialStates;	
-	std::map<BitVector, std::set<State> > toState;
-	
-	for(std::set<State>::iterator S1 = states1.begin(); S1!=states1.end(); S1++){
-		for(std::set<State>::iterator S2 = states2.begin(); S2!=states2.end(); S2++){
-			if(*S1 == *S2){
-				initialStates.insert(S1);
-			}
-		}
-	}
-	remain = initialStates;
+   std::set<State> states1 = fa1->initialStates;       
+   std::set<State> states2 = fa2->initialStates;  
+   
+   std::pair<State, State> > pairs;
+   std::pair<std::pair<State, State>, int > intpair;
+   std::map<std::pair<State, State>, int> stateMap;
+   std::queue<std::pair<std::pair<State, State>, int > > remain;
 
-	while(!remain.isEmpty()){
-		toState = remain
-	}
-	return false;
+   int i = 0;
+
+   for(std::set<State>::iterator S1 = states1.begin(); S1!=states1.end(); S1++){
+     for(std::set<State>::iterator S2 = states2.begin(); S2!=states2.end(); S2++){
+       pairs.first = S1*;
+       pairs.second = S2*;
+
+       intpair.first = pairs;
+       intpair.second = i;
+
+       remain.push(intpair);
+       initialStates.insert(i);
+       i++;
+     }
+   } 
+   
+   while(!remain.isEmpty()){
+   		intpairs = remain.peek();
+   		pairs = intpairs.first;
+   		int state = intpairs.second;
+
+   		states.insert(state);
+   		remain.pop();
+
+   		if(fa1.finalStates.contains(pairs.first) && fa2.finalStates.contains(pairs.second)){
+   			markFinal(i);
+   		}
+
+   		std::set<unsigned>::iterator it;
+   		int laststate = i;
+   		for(it = fa1->alphabet.begin(); it != fa1->alphabet.end(); ++it){
+   			std::map<BitVector, std::set<State> transf1 = fa1->transitions.find(pairs.first);
+   			std::map<BitVector, std::set<State> transf2 = fa2->transitions.find(pairs.second);
+
+   			std::set<State> nextf1 = transf1.find(*it);
+   			std::set<State> nextf2 = transf2.find(*it);
+
+   			std::set<State>::iterator itf1;
+   			std::set<State>::iterator itf2;
+
+   			for(itf1 = nextf1.begin(); itf1 != nextf1.end(); ++itf1){
+   				for(itf2 = nextf2.begin(); itf2 != nextf2.end(); ++itf2){
+   					   std::pair<State, State> > nextstate;
+   					   nextstate.first = itf1*;
+   					   nextstate.second = itf2*;
+   					   if(!states.contains(nextstate)){
+   					   		remain.push(nextstate);
+   					   		i++;
+   					   }
+
+   					   addTransition(laststate, *it, i);
+   					}
+   				}
+   			}
+   		} 
 }
+
 
 void Automaton::addToAlphabet(unsigned varnr){
 
@@ -106,7 +152,16 @@ void Automaton::project(const unsigned variable){
 }
 
 void Automaton::makeDeterministic(Automaton& fa){
+  std::set<State> Q, d, F, remain;
+  std::set<State> S = fa1->initialStates;
+  std::set<State> remain = S;
 
+  while(!remain.isEmpty()){
+
+  }
+  std::map<BitVector, std::set<State> > toState;
+
+	remain = initialStates; 
 }
 
 void Automaton::printStates(std::ostream &str, const std::set<State> s) {
