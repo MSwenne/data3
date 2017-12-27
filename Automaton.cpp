@@ -65,7 +65,24 @@ bool Automaton::inFinalState() const{
 }
 
 void Automaton::intersect(Automaton& fa1, Automaton& fa2){
+	std::set<State> Q, d, F, remain;
+	std::set<State> states1 = fa1->initialStates;	
+	std::set<State> states2 = fa2->initialStates;	
+	std::map<BitVector, std::set<State> > toState;
+	
+	for(std::set<State>::iterator S1 = states1.begin(); S1!=states1.end(); S1++){
+		for(std::set<State>::iterator S2 = states2.begin(); S2!=states2.end(); S2++){
+			if(*S1 == *S2){
+				initialStates.insert(S1);
+			}
+		}
+	}
+	remain = initialStates;
 
+	while(!remain.isEmpty()){
+		toState = remain
+	}
+	return false;
 }
 
 void Automaton::addToAlphabet(unsigned varnr){
