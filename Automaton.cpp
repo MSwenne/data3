@@ -73,24 +73,42 @@ bool Automaton::inFinalState() const{
 }
 
 void Automaton::intersect(Automaton& fa1, Automaton& fa2){
-	std::set<State> Q, d, F, remain;
+	std::set<pair<State, State> > Q, d, F;
+	std::set<pair<State,State>, unsigned> S, remain;
 	std::set<State> states1 = fa1->initialStates;	
 	std::set<State> states2 = fa2->initialStates;	
-	std::map<BitVector, std::set<State> > toState;
-	
+	std::pair<std::pair<State, State>, unsigned> states;
+	int i = 0;
+	alphabet = f1->alphabet;
+
 	for(std::set<State>::iterator S1 = states1.begin(); S1!=states1.end(); S1++){
 		for(std::set<State>::iterator S2 = states2.begin(); S2!=states2.end(); S2++){
-			if(*S1 == *S2){
-				initialStates.insert(S1);
+			S.push(std::pair(S1,S2),i);
+			markInitial(i);
+			i++;
+		}
+	}
+	remain = S;
+
+	while(!remain.isEmpty()){
+		states = remain.peek().first;
+		i = remain.peek().second;
+		remain.pop();
+		if(fa1->finalStates.contains(states.first) &&
+			 fa2->finalStates.contains(states.second)) {
+			markFinal(i);
+		}
+		std::map<BitVector, std::set<State> transf1 = fa1->transitions.find(states.first);
+		std::map<BitVector, std::set<State> transf2 = fa2->transitions.find(states.second);
+		for(itf1 = transtf1.begin(); itf1 != transf1.end(); ++itf1){
+			for(itf2 = transf2.begin(); itf2 != transf2.end(); ++itf2){
+				if(*itf1 == *itf2){
+					addTransition(i, itf1, 
+					}
+				}
 			}
 		}
 	}
-	remain = initialStates;
-
-	while(!remain.isEmpty()){
-		toState = remain
-	}
-	return false;
 }
 
 void Automaton::addToAlphabet(unsigned varnr){
