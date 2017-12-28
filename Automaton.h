@@ -87,6 +87,8 @@ class Automaton {
 		*/
 		void print(std::ostream &str) const;
 
+		void setMap(std::map<std::pair<State, State>, int> &stateMap, Automaton fa1, Automaton fa2);
+
 	private:
 		/**
 		* Read a single BitVector as input and move from the set of current states to the set of next states
