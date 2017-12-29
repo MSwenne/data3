@@ -87,6 +87,11 @@ class Automaton {
 		*/
 		void print(std::ostream &str) const;
 
+		unsigned setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<State, State>, unsigned>& stateMap, std::queue<std::pair<State, State> >& remain);
+
+		void makeBitSet(int length, std::set<BitVector>& result);
+
+		void makeBitSet_p(int lentgh, int i, BitVector bv, std::set<BitVector>& result);
 	private:
 		/**
 		* Read a single BitVector as input and move from the set of current states to the set of next states
