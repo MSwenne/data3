@@ -81,13 +81,15 @@ class Automaton {
 		* Make automata fa deterministic, eliminate epsilon transitions, and store the result in the current automaton
 		*/
 		void makeDeterministic(Automaton& fa);
+		bool check_intersect(std::set<State> checkStates);
+
 
 		/**
 		* Prints the current automaton to the specified stream
 		*/
 		void print(std::ostream &str) const;
 
-		unsigned setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<State, State>, unsigned>& stateMap, std::queue<std::pair<State, State> >& remain);
+		int setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<State, State>, int>& stateMap, std::queue<std::pair<State, State> >& remain);
 
 		void makeBitSet(int length, std::set<BitVector>& result);
 
