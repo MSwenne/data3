@@ -79,13 +79,13 @@ void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 	std::pair<State, State> nextpair;
 	std::map<BitVector, std::set<State> > transf1, transf2; 
 	std::set<State> nextf1, nextf2;
-	// unsigned -> int
 	std::map<std::pair<State, State>, int> stateMap;
 	std::queue<std::pair<State, State> > remain;
-
+	std::set<State>::iterator itf1, itf2;
+	std::set<BitVector>::iterator it;
+	
 	makeBitSet(fa1.alphabet.size(), bitSet);
 	int i = setInitial(fa1, fa2, stateMap, remain);
-
 	while(!remain.empty()){
 		pairs = remain.front();
 		auto state = stateMap.find(pairs)->second;
@@ -94,33 +94,28 @@ void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() && 
 			fa2.finalStates.find(pairs.second)!=fa2.finalStates.end()){
 			markFinal(stateMap[pairs]);
-	}
-	std::set<BitVector>::iterator it;
-	for(it = bitSet.begin(); it != bitSet.end(); ++it){
-		transf1 = fa1.transitions.find(pairs.first)->second;
-		transf2 = fa2.transitions.find(pairs.second)->second;
-		nextf1 = transf1.find(*it)->second;
-		nextf2 = transf2.find(*it)->second;
-		std::set<State>::iterator itf1, itf2;
-		for(itf1 = nextf1.begin(); itf1 != nextf1.end(); ++itf1){
-			for(itf2 = nextf2.begin(); itf2 != nextf2.end(); ++itf2){
-				nextpair.first = *itf1;
-				nextpair.second = *itf2;
-				auto next = stateMap.find(nextpair);
-				if(next == stateMap.end()){
-					stateMap.insert(std::make_pair(nextpair, i));
-					i++;
-					remain.push(nextpair);
-				}	
-				// addTransition(state, *it, next->second);
-				// als next == statemap.end dan is next->second niks dus eerst even opnieuw next vinden
-				next = stateMap.find(nextpair);
-				addTransition(state, *it, next->second);
-
+		}
+		for(it = bitSet.begin(); it != bitSet.end(); ++it){
+			transf1 = fa1.transitions.find(pairs.first)->second;
+			transf2 = fa2.transitions.find(pairs.second)->second;
+			nextf1 = transf1.find(*it)->second;
+			nextf2 = transf2.find(*it)->second;
+			for(itf1 = nextf1.begin(); itf1 != nextf1.end(); ++itf1){
+				for(itf2 = nextf2.begin(); itf2 != nextf2.end(); ++itf2){
+					nextpair.first = *itf1;
+					nextpair.second = *itf2;
+					auto next = stateMap.find(nextpair);
+					if(next == stateMap.end()){
+						stateMap.insert(std::make_pair(nextpair, i));
+						i++;
+						remain.push(nextpair);
+					}	
+					next = stateMap.find(nextpair);
+					addTransition(state, *it, next->second);
+				}
 			}
 		}
 	}
-} 
 }
 
 int Automaton::setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<State, State>, int> &stateMap, std::queue<std::pair<State, State> > &remain) {
@@ -168,7 +163,34 @@ void Automaton::makeBitSet_p(int length, int i, BitVector bv, std::set<BitVector
 }
 
 void Automaton::addToAlphabet(unsigned varnr){
+	std::map<State, std::map<BitVector, std::set<State> > > newtransitions;
+	std::map<State, std::map<BitVector, std::set<State> > >::iterator it;
+	std::map<BitVector, std::set<State> > newtrans;
+	std::map<BitVector, std::set<State> > trans;
+	std::map<BitVector, std::set<State> >::iterator it2;
+	std::set<State> nextstates;
 
+	// loop over transition, get for every state, transitions->second
+	for(it = transitions.begin(); it != transitions.end(); ++it){
+		State origstate = *it.first;
+		trans = *it->second;
+		// loop over Map<bitVector, std::Set<State> >, get every bitVector
+		// for everyBitvector, make 2 new bitVectors (origVec1, origVec2)
+		// and insert into our trans map
+		for(it2 = trans.begin(); it2 != trans.end(); ++it2){
+			nextstates = *it2->second;
+			BitVector origVec1 = *it2->first;
+			BitVector origVec2 = *it2->first;
+			origVec1[varnr] = 0;
+			origVec2[varnr] = 1;
+			//add the 2 new bitvectors to the map
+			newtrans[origVec1] = nextstates;
+			newtrans[origVec2] = nextstates;
+		}
+		// add transitions with new bitvectors to newtransitions
+		newtransitions.insert(std::make_pair(origstate, newtrans));
+	}
+	transitions = newtransitions;
 }
 
 void Automaton::complement(Automaton& fa){
@@ -182,59 +204,43 @@ void Automaton::project(const unsigned variable){
 void Automaton::makeDeterministic(Automaton& fa){
 	std::queue<std::set<State> > remain;
 	std::map<std::set<State>, int> stateMap;
-
 	std::map<BitVector, std::set<State> > transf; 
-	std::set<State> nextf;
-	
-	std::set<State> Q;
 	std::set<BitVector> bitSet;
-
+	std::set<BitVector>::iterator it;
+	std::set<State> nextf, Q, nextQ;
+	std::set<State>::iterator Qit, itf;
 	int i = 0;
+
 	makeBitSet(fa.alphabet.size(), bitSet);
 	stateMap.insert(std::make_pair(fa.initialStates, i));
-	
 	markInitial(i);
-
 	remain.push(fa.initialStates);
 
 	while(!remain.empty()){
 		Q = remain.front();
 		auto state = stateMap.find(Q)->second;
 		addState(state);
-
 		if(fa.check_intersect(Q)){
 			markFinal(i);
 		}
-
-		std::set<BitVector>::iterator it;
 		for(it = bitSet.begin(); it != bitSet.end(); ++it){
-			std::set<State> nextQ;
-
-			std::set<State>::iterator Qit;
 			for(Qit = Q.begin(); Qit != Q.end(); ++Qit){
 				transf = fa.transitions.find(*Qit)->second;
 				nextf = transf.find(*it)->second;
-				
-				std::set<State>::iterator itf;
 				for(itf = nextf.begin(); itf != nextf.end(); ++itf){
 					nextQ.insert(*itf);
 				}
-
 			}
-
 			auto next = stateMap.find(nextQ);
 			if(next == stateMap.end()){
 				i++;
 				stateMap.insert(std::make_pair(nextQ, i));
 				remain.push(nextQ);
 			}
-
 			next = stateMap.find(nextQ);
 			addTransition(state, *it, next->second);
 		}
-
 	}
-
 }
 
 bool Automaton::check_intersect(std::set<State> checkStates){
