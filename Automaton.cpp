@@ -172,15 +172,15 @@ void Automaton::addToAlphabet(unsigned varnr){
 
 	// loop over transition, get for every state, transitions->second
 	for(it = transitions.begin(); it != transitions.end(); ++it){
-		State origstate = *it.first;
-		trans = *it->second;
+		State origstate = it->first;
+		trans = it->second;
 		// loop over Map<bitVector, std::Set<State> >, get every bitVector
 		// for everyBitvector, make 2 new bitVectors (origVec1, origVec2)
 		// and insert into our trans map
 		for(it2 = trans.begin(); it2 != trans.end(); ++it2){
-			nextstates = *it2->second;
-			BitVector origVec1 = *it2->first;
-			BitVector origVec2 = *it2->first;
+			nextstates = it2->second;
+			BitVector origVec1 = it2->first;
+			BitVector origVec2 = it2->first;
 			origVec1[varnr] = 0;
 			origVec2[varnr] = 1;
 			//add the 2 new bitvectors to the map
