@@ -53,6 +53,12 @@ class Automaton {
 		*/
 		void intersect(Automaton& fa1, Automaton& fa2);
 
+		int setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<State, State>, int>& stateMap, std::queue<std::pair<State, State> >& remain);
+
+		void makeBitSet(int length, std::set<BitVector>& result);
+
+		void makeBitSet_p(int lentgh, int i, BitVector bv, std::set<BitVector>& result);
+	
 		/**
 		* Replace every bitvector in the transitions with two new bitvectors that additionally contain the new variable varnr:
 		* 1. a transition where variable varnr has value 0
@@ -81,17 +87,14 @@ class Automaton {
 		* Make automata fa deterministic, eliminate epsilon transitions, and store the result in the current automaton
 		*/
 		void makeDeterministic(Automaton& fa);
+		bool check_intersect(std::set<State> checkStates);
+
 
 		/**
 		* Prints the current automaton to the specified stream
 		*/
 		void print(std::ostream &str) const;
 
-		unsigned setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<State, State>, unsigned>& stateMap, std::queue<std::pair<State, State> >& remain);
-
-		void makeBitSet(int length, std::set<BitVector>& result);
-
-		void makeBitSet_p(int lentgh, int i, BitVector bv, std::set<BitVector>& result);
 	private:
 		/**
 		* Read a single BitVector as input and move from the set of current states to the set of next states
