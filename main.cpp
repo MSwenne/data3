@@ -2,7 +2,12 @@
 #include "exprtree.h"
 #include "Automaton.h"
 
-
+/**
+ * Implementation of the class main
+ * Yenebeb Schwarze (s1908928) & Martijn Swenne (s1923889)
+ * Datum: 5 Jan 2018
+ * Datastructuren Assignment 3
+**/
 
 Automaton createAutomaton(ExprTree * exptree){
     Automaton theAuto;

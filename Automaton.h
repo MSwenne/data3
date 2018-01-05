@@ -1,6 +1,13 @@
 #ifndef AUTOMATON_H
 #define AUTOMATON_H
 
+/**
+ * Prototype of the class Automaton
+ * Yenebeb Schwarze (s1908928) & Martijn Swenne (s1923889)
+ * Datum: 5 Jan 2018
+ * Datastructuren Assignment 3
+**/
+
 #include <algorithm>
 #include <map>
 #include <set>
@@ -53,10 +60,21 @@ class Automaton {
 		*/
 		void intersect(Automaton& fa1, Automaton& fa2);
 
+		/**
+		* Makes a map with a pair combination of all the initial states of fa1 and fa2 and adds a
+		* corresponding new state value to every state
+		*/
 		int setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<State, State>, int>& stateMap, std::queue<std::pair<State, State> >& remain);
 
+		/**
+		* Makes a set of BitVectors which contains every possible BitVector you can make with the 
+		* given alphabet (so you can loop over every BitVector)
+		*/
 		void makeBitSet(int length, std::set<BitVector>& result);
 
+		/**
+		* a recursive helper function for makeBitSet
+		*/
 		void makeBitSet_p(int lentgh, int i, BitVector bv, std::set<BitVector>& result);
 	
 		/**
@@ -87,8 +105,11 @@ class Automaton {
 		* Make automata fa deterministic, eliminate epsilon transitions, and store the result in the current automaton
 		*/
 		void makeDeterministic(Automaton& fa);
-		bool check_intersect(std::set<State> checkStates);
 
+		/**
+		* checks of checkStates intersects with finalStates
+		*/
+		bool check_intersect(std::set<State> checkStates);
 
 		/**
 		* Prints the current automaton to the specified stream
@@ -102,7 +123,6 @@ class Automaton {
 		void next(const BitVector input);
 
 		/**
-		* OPTIONEEL (voor bonus)!!!
 		* Eliminate epsilon transitions, and store the result in the current automaton
 		*/
 		void eliminateLambda(Automaton& fa);
@@ -116,7 +136,6 @@ class Automaton {
 		* Prints the BitVector t to the specified stream
 		*/
 		static void printTransitionLabel(std::ostream &str, const BitVector t);
-
 
 		// the set of all states
 		std::set<State> states;
