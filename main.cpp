@@ -121,7 +121,7 @@ void menu(bool debug, std::istream& inStr, std::ostream &out){
 	delete t;
 }
 
-/*
+
 int main(int argc, char** argv)
 {
     bool debug = false;
@@ -130,4 +130,4 @@ int main(int argc, char** argv)
     }
     menu(debug, std::cin, std::cout);
     return 0;
-}*/
+}

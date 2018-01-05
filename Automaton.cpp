@@ -345,25 +345,12 @@ void Automaton::print(std::ostream &str) const {
 	}
 }
 
-// eliminates lambda transitions in fa
-void Automaton::eliminateLambda(Automaton& fa){
-	std::map<State, std::map<BitVector, std::set<State> > >::iterator it;
-	for(it = transitions.begin(); it != transitions.end(); ++it){
-		std::map<BitVector, std::set<State> > bitMap = it->second;
-		std::map<BitVector, std::set<State> >::iterator bitIt;
-		for(bitIt = bitMap.begin(); bitIt != bitMap.end(); ++bitIt){
-			BitVector vec = bitIt->first;
-			if(vec.){
-				std::map<BitVector, std::set<State> > bit = it->second;
-				std::set<State> nextS = bitIt->second;
-				bit.erase(vec);
-				vec.erase(variable);
-				bit[vec] = nextS;
-				transitions[it->first] = bit;
-			}
-		}
-	}
 
+// eliminate empty transitions
+void Automaton::eliminateLambda(Automaton& fa){
+	addState(0);
+	markInitial(0);
+	markFinal(0);
 }
 
 int main() {
