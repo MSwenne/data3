@@ -210,11 +210,12 @@ void Automaton::project(const unsigned variable){
 		for(bitIt = bitMap.begin(); bitIt != bitMap.end(); ++bitIt){
 			BitVector vec = bitIt->first;
 			if(vec.find(variable) != vec.end()){
+				std::map<BitVector, std::set<State> > bit = it->second;
 				std::set<State> nextS = bitIt->second;
-				bitMap.erase(vec);
+				bit.erase(vec);
 				vec.erase(variable);
-				bitMap[vec] = nextS;
-				transitions[it->first] = bitMap;
+				bit[vec] = nextS;
+				transitions[it->first] = bit;
 			}
 		}
 
@@ -358,6 +359,8 @@ void Automaton::print(std::ostream &str) const {
 	}
 }
 
+void Automaton::eliminateLambda(Automaton& fa);
+
 int main() {
     Automaton fa1;
     Automaton fa2;
@@ -394,8 +397,11 @@ int main() {
     fa2.markFinal(2);
     
     fa1.print(std::cout);
+    fa1.project(0);
+    fa1.print(std::cout);
     fa1.project(1);
     fa1.print(std::cout);
+
 
 /*
     std::cout << std::endl << std::endl << "intersect:" << std::endl;
