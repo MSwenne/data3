@@ -194,7 +194,6 @@ void Automaton::addToAlphabet(unsigned varnr){
 
 // makes the complement of the given FA
 void Automaton::complement(Automaton& fa){
-	fa.makeDeterministic;
 	std::set<State> copyInitial = initialStates;
 	initialStates = finalStates;
 	finalStates = copyInitial;
@@ -352,56 +351,3 @@ void Automaton::eliminateLambda(Automaton& fa){
 	markInitial(0);
 	markFinal(0);
 }
-
-int main() {
-    Automaton fa1;
-    Automaton fa2;
-    Automaton fa3;
-    BitVector bv, bv2;
-    bv[0] = 0;
-    bv[1] = 1;
-    bv2[0] = 1;
-    bv2[1] = 0;
-
-    fa1.markInitial(0);
-    fa1.addState(0);
-    fa1.addState(1);
-    fa1.addState(2);
-    fa1.addTransition(0, bv, 1);
-  	fa1.addTransition(1, bv, 2);
-	fa1.addTransition(2, bv, 2);
-	fa1.addTransition(0, bv2, 0);
-    fa1.addTransition(1, bv2, 0);
-	fa1.addTransition(2, bv2, 2);
-	fa1.markFinal(0);
-	fa1.markFinal(1);
-    
-	fa2.markInitial(0);
-  	fa2.addState(0);
-    fa2.addState(1);
-    fa2.addState(2);
-    fa2.addTransition(0, bv, 1);
-    fa2.addTransition(1, bv, 1);
-    fa2.addTransition(2, bv, 1);
-    fa2.addTransition(0, bv2, 0);
-    fa2.addTransition(1, bv2, 2);
-    fa2.addTransition(2, bv2, 0);
-    fa2.markFinal(2);
-    
-    fa1.print(std::cout);
-    fa1.project(0);
-    fa1.print(std::cout);
-    fa1.project(1);
-    fa1.print(std::cout);
-
-
-/*
-    std::cout << std::endl << std::endl << "intersect:" << std::endl;
-    fa3.intersect(fa1, fa2);
-    fa3.print(std::cout);*/
-}
-
-
-
-
-
