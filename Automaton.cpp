@@ -88,7 +88,7 @@ void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 		auto state = stateMap.find(pairs)->second;
 		addState(state);
 		remain.pop();
-		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() && 
+		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() ||
 			fa2.finalStates.find(pairs.second)!=fa2.finalStates.end()){
 			markFinal(stateMap[pairs]);
 	}
@@ -203,6 +203,22 @@ void Automaton::complement(Automaton& fa){
 
 void Automaton::project(const unsigned variable){
 
+	std::map<State, std::map<BitVector, std::set<State> > >::iterator it;
+	for(it = transitions.begin(); it != transitions.end(); ++it){
+		std::map<BitVector, std::set<State> > bitMap = it->second;
+		std::map<BitVector, std::set<State> >::iterator bitIt;
+		for(bitIt = bitMap.begin(); bitIt != bitMap.end(); ++bitIt){
+			BitVector vec = bitIt->first;
+			if(vec.find(variable) != vec.end()){
+				std::set<State> nextS = bitIt->second;
+				bitMap.erase(vec);
+				vec.erase(variable);
+				bitMap[vec] = nextS;
+				transitions[it->first] = bitMap;
+			}
+		}
+
+	}
 }
 
 void Automaton::makeDeterministic(Automaton& fa){
@@ -358,14 +374,14 @@ int main() {
     fa1.addState(2);
     fa1.addTransition(0, bv, 1);
   	fa1.addTransition(1, bv, 2);
-		fa1.addTransition(2, bv, 2);
-		fa1.addTransition(0, bv2, 0);
+	fa1.addTransition(2, bv, 2);
+	fa1.addTransition(0, bv2, 0);
     fa1.addTransition(1, bv2, 0);
-		fa1.addTransition(2, bv2, 2);
-		fa1.markFinal(0);
-		fa1.markFinal(1);
+	fa1.addTransition(2, bv2, 2);
+	fa1.markFinal(0);
+	fa1.markFinal(1);
     
-		fa2.markInitial(0);
+	fa2.markInitial(0);
   	fa2.addState(0);
     fa2.addState(1);
     fa2.addState(2);
@@ -378,9 +394,13 @@ int main() {
     fa2.markFinal(2);
     
     fa1.print(std::cout);
+    fa1.project(1);
+    fa1.print(std::cout);
+
+/*
     std::cout << std::endl << std::endl << "intersect:" << std::endl;
     fa3.intersect(fa1, fa2);
-    fa3.print(std::cout);
+    fa3.print(std::cout);*/
 }
 
 
