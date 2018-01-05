@@ -88,7 +88,7 @@ void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 		auto state = stateMap.find(pairs)->second;
 		addState(state);
 		remain.pop();
-		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() && 
+		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() || 
 			fa2.finalStates.find(pairs.second)!=fa2.finalStates.end()){
 			markFinal(stateMap[pairs]);
 	}
