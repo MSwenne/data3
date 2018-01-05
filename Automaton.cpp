@@ -343,32 +343,47 @@ void Automaton::print(std::ostream &str) const {
 }
 
 int main() {
-	Automaton fa;
-	Automaton fa2;
-	BitVector bv;
-	bv[0] = 1;
-	bv[1] = 0;
-	BitVector bv2;
-	bv2[0] = 0;
-	bv2[1] = 1;
-	State initialState = 0;
-	fa.addState(initialState);
-	fa.markInitial(initialState);
-	fa.addState(1);
-	fa.addState(2);
-	fa.addState(3);
-	fa.addState(4);
-	fa.addTransition(0,bv, 1);
-	fa.addTransition(1, bv, 2);
-	fa.addTransition(1, bv, 3);
-	fa.addTransition(2, bv, 2);
+    Automaton fa1;
+    Automaton fa2;
+    Automaton fa3;
+    BitVector bv, bv2;
+    bv[0] = 0;
+    bv[1] = 1;
+    bv2[0] = 1;
+    bv2[1] = 0;
 
-	fa.addTransition(2, bv2, 3);
-	fa.addTransition(3, bv2, 4);
-	fa.markFinal(4);
-	fa.print(std::cout);
-	std::cout << "determin" << std::endl;
-	fa2.makeDeterministic(fa);
-	fa2.print(std::cout);
+    fa1.markInitial(0);
+    fa1.addState(0);
+    fa1.addState(1);
+    fa1.addState(2);
+    fa1.addTransition(0, bv, 1);
+  	fa1.addTransition(1, bv, 2);
+		fa1.addTransition(2, bv, 2);
+		fa1.addTransition(0, bv2, 0);
+    fa1.addTransition(1, bv2, 0);
+		fa1.addTransition(2, bv2, 2);
+		fa1.markFinal(0);
+		fa1.markFinal(1);
+    
+		fa2.markInitial(0);
+  	fa2.addState(0);
+    fa2.addState(1);
+    fa2.addState(2);
+    fa2.addTransition(0, bv, 1);
+    fa2.addTransition(1, bv, 1);
+    fa2.addTransition(2, bv, 1);
+    fa2.addTransition(0, bv2, 0);
+    fa2.addTransition(1, bv2, 2);
+    fa2.addTransition(2, bv2, 0);
+    fa2.markFinal(2);
+    
+    fa1.print(std::cout);
+    std::cout << std::endl << std::endl << "intersect:" << std::endl;
+    fa3.intersect(fa1, fa2);
+    fa3.print(std::cout);
 }
+
+
+
+
 
