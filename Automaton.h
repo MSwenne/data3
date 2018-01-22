@@ -22,6 +22,11 @@ typedef int State;
 class Automaton {
 	public:
 		/**
+		* resets current automaton
+		*/
+		void reset();
+
+		/**
 		* Add the given state (an integer) to the automaton
 		*/
 		void addState(const State state);

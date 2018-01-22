@@ -6,6 +6,16 @@
  * Datastructuren Assignment 3
 **/
 
+// resets current automaton
+void Automaton::reset(){
+	std::set<State> newStates, newInitialStates, newFinalStates, newCurrentstates;
+	std::map<State, std::map<BitVector, std::set<State> > > newTransitions;
+	
+	initialStates = newInitialStates;
+	finalStates = newFinalStates;
+	transitions = newTransitions;
+	currentStates = newCurrentstates;
+}
 
 // adds a new state to the automata
 void Automaton::addState(const State state){
@@ -95,28 +105,28 @@ void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() || 
 			fa2.finalStates.find(pairs.second)!=fa2.finalStates.end()){
 			markFinal(stateMap[pairs]);
-	}
-	for(it = bitSet.begin(); it != bitSet.end(); ++it){
-		transf1 = fa1.transitions.find(pairs.first)->second;
-		transf2 = fa2.transitions.find(pairs.second)->second;
-		nextf1 = transf1.find(*it)->second;
-		nextf2 = transf2.find(*it)->second;
-		for(itf1 = nextf1.begin(); itf1 != nextf1.end(); ++itf1){
-			for(itf2 = nextf2.begin(); itf2 != nextf2.end(); ++itf2){
-				nextpair.first = *itf1;
-				nextpair.second = *itf2;
-				auto next = stateMap.find(nextpair);
-				if(next == stateMap.end()){
-					stateMap.insert(std::make_pair(nextpair, i));
-					i++;
-					remain.push(nextpair);
-				}	
-				next = stateMap.find(nextpair);
-				addTransition(state, *it, next->second);
+		}
+		for(it = bitSet.begin(); it != bitSet.end(); ++it){
+			transf1 = fa1.transitions.find(pairs.first)->second;
+			transf2 = fa2.transitions.find(pairs.second)->second;
+			nextf1 = transf1.find(*it)->second;
+			nextf2 = transf2.find(*it)->second;
+			for(itf1 = nextf1.begin(); itf1 != nextf1.end(); ++itf1){
+				for(itf2 = nextf2.begin(); itf2 != nextf2.end(); ++itf2){
+					nextpair.first = *itf1;
+					nextpair.second = *itf2;
+					auto next = stateMap.find(nextpair);
+					if(next == stateMap.end()){
+						stateMap.insert(std::make_pair(nextpair, i));
+						i++;
+						remain.push(nextpair);
+					}	
+					next = stateMap.find(nextpair);
+					addTransition(state, *it, next->second);
+				}
 			}
 		}
 	}
-}
 }
 
 // makes a map of initial state pairs and their new state value
@@ -347,7 +357,12 @@ void Automaton::print(std::ostream &str) const {
 
 // eliminate empty transitions
 void Automaton::eliminateLambda(Automaton& fa){
-	addState(0);
-	markInitial(0);
-	markFinal(0);
+	reset();
+
+	State initial = 0;
+	addState(initial);
+	markInitial(initial);
+	markFinal(initial);
+
+
 }
