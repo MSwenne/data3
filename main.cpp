@@ -1,3 +1,6 @@
+#ifndef MAIN
+#define MAIN
+
 #include <iostream>
 #include "exprtree.h"
 #include "Automaton.h"
@@ -11,6 +14,7 @@
 
 Automaton createAutomaton(ExprTree * exptree){
     Automaton theAuto;
+    //theAuto.createAutomaton(exptree);
     // TODO (voor studenten in deel 2): Bouw de Presburger automaat door de meegegeven syntaxtree exptree van de formule te doorlopen
 		
 
@@ -131,3 +135,4 @@ int main(int argc, char** argv)
     menu(debug, std::cin, std::cout);
     return 0;
 }
+#endif

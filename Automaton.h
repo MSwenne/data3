@@ -14,6 +14,7 @@
 #include <list>
 #include <queue>
 #include <iostream>
+//#include "exprtree.h"
 
 typedef std::map<unsigned, bool> BitVector;
 typedef int State;
@@ -21,6 +22,9 @@ typedef int State;
 
 class Automaton {
 	public:
+		
+		//void createAutomaton(ExprTree* exp);
+
 		/**
 		* resets current automaton
 		*/
