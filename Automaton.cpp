@@ -1,14 +1,28 @@
 #include "Automaton.h"
+/**
+ * Implementation of the class Automaton
+ * Yenebeb Schwarze (s1908928) & Martijn Swenne (s1923889)
+ * Datum: 5 Jan 2018
+ * Datastructuren Assignment 3
+**/
 
+// resets current automaton
+void Automaton::reset(){
+	std::set<State> newStates, newInitialStates, newFinalStates, newCurrentstates;
+	std::map<State, std::map<BitVector, std::set<State> > > newTransitions;
+	
+	initialStates = newInitialStates;
+	finalStates = newFinalStates;
+	transitions = newTransitions;
+	currentStates = newCurrentstates;
+}
 
-
-// TODO (voor studenten - deel 1): VOEG HIER DE IMPLEMENTATIES VAN DE OPERATIES IN Automaton.h TOE
-
-
+// adds a new state to the automata
 void Automaton::addState(const State state){
 	states.insert(state);
 }
 
+// adds a new transition from a given state to a given state
 void Automaton::addTransition(const State from, const BitVector label, const State to){
 	std::map<BitVector, std::set<State> > toMap;
 	std::set<State> toState;
@@ -19,34 +33,30 @@ void Automaton::addTransition(const State from, const BitVector label, const Sta
 		for(std::map<unsigned,bool>::const_iterator i= label.begin(); i!=label.end(); i++)
 			alphabet.insert(i->first);
 	}
-
 	it = transitions.find(from);
-	if(it == transitions.end()){
-		toState.insert(to);
-		toMap[label] = toState;
-		transitions[from] = toMap;
-		return;
+	if(it != transitions.end()){
+		toMap = it->second;
+		setIt = toMap.find(label);
+		if(setIt != toMap.end()){
+			toState = setIt->second;
+		}
 	}
-	toMap = it->second;
-	setIt = toMap.find(label);
-	if(setIt != toMap.end()){
-		setIt->second.insert(to);
-		return;
-	}
-
 	toState.insert(to);
 	toMap[label] = toState;
-
+	transitions[from] = toMap;
 }
 
+// marks a state as an initial state
 void Automaton::markInitial(const State state){
 	initialStates.insert(state);
 }
 
+// marks a state as a final state
 void Automaton::markFinal(const State state){
 	finalStates.insert(state);
 }
 
+// checks if an input qualifies for the automata
 void Automaton::parseInput(const std::list<BitVector> input){
 	std::list<BitVector>::const_iterator it;
 	currentStates = initialStates;
@@ -58,6 +68,7 @@ void Automaton::parseInput(const std::list<BitVector> input){
 	}
 }
 
+// checks if one of your current states is a final state
 bool Automaton::inFinalState() const{
 	std::set<State>::iterator itcur;
 	std::set<State>::iterator itfin;
@@ -72,7 +83,7 @@ bool Automaton::inFinalState() const{
 	return false;
 }
 
-//
+// makes an intersection automata of the two given automata
 void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 	std::set<BitVector> bitSet;
 	std::pair<State, State> pairs;
@@ -91,7 +102,7 @@ void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 		auto state = stateMap.find(pairs)->second;
 		addState(state);
 		remain.pop();
-		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() && 
+		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() || 
 			fa2.finalStates.find(pairs.second)!=fa2.finalStates.end()){
 			markFinal(stateMap[pairs]);
 		}
@@ -118,6 +129,7 @@ void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 	}
 }
 
+// makes a map of initial state pairs and their new state value
 int Automaton::setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<State, State>, int> &stateMap, std::queue<std::pair<State, State> > &remain) {
 	std::pair<State, State> pairs;
 	std::set<State> states1 = fa1.initialStates;
@@ -137,6 +149,7 @@ int Automaton::setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<Sta
 	return i;
 }
 
+// makes a set of every possible BitSet you can make with an alphabet of given length
 void Automaton::makeBitSet(int length, std::set<BitVector> &result){
 	BitVector bv1;
 	BitVector bv2;
@@ -146,6 +159,7 @@ void Automaton::makeBitSet(int length, std::set<BitVector> &result){
 	makeBitSet_p(length, 1, bv2, result);
 }
 
+// helper function for makeBitSet
 void Automaton::makeBitSet_p(int length, int i, BitVector bv, std::set<BitVector> &result){
 	BitVector bv1 = bv;
 	BitVector bv2 = bv;
@@ -162,6 +176,7 @@ void Automaton::makeBitSet_p(int length, int i, BitVector bv, std::set<BitVector
 	}
 }
 
+// adds a new variable varnr to the automata
 void Automaton::addToAlphabet(unsigned varnr){
 	std::map<State, std::map<BitVector, std::set<State> > > newtransitions;
 	std::map<State, std::map<BitVector, std::set<State> > >::iterator it;
@@ -170,44 +185,58 @@ void Automaton::addToAlphabet(unsigned varnr){
 	std::map<BitVector, std::set<State> >::iterator it2;
 	std::set<State> nextstates;
 
-	// loop over transition, get for every state, transitions->second
 	for(it = transitions.begin(); it != transitions.end(); ++it){
 		State origstate = it->first;
 		trans = it->second;
-		// loop over Map<bitVector, std::Set<State> >, get every bitVector
-		// for everyBitvector, make 2 new bitVectors (origVec1, origVec2)
-		// and insert into our trans map
 		for(it2 = trans.begin(); it2 != trans.end(); ++it2){
 			nextstates = it2->second;
 			BitVector origVec1 = it2->first;
 			BitVector origVec2 = it2->first;
 			origVec1[varnr] = 0;
 			origVec2[varnr] = 1;
-			//add the 2 new bitvectors to the map
 			newtrans[origVec1] = nextstates;
 			newtrans[origVec2] = nextstates;
 		}
-		// add transitions with new bitvectors to newtransitions
 		newtransitions.insert(std::make_pair(origstate, newtrans));
 	}
 	transitions = newtransitions;
 }
 
+// makes the complement of the given FA
 void Automaton::complement(Automaton& fa){
-
+	std::set<State> copyInitial = initialStates;
+	initialStates = finalStates;
+	finalStates = copyInitial;
 }
 
+// deletes the given variable from the automata
 void Automaton::project(const unsigned variable){
-
+	std::map<State, std::map<BitVector, std::set<State> > >::iterator it;
+	for(it = transitions.begin(); it != transitions.end(); ++it){
+		std::map<BitVector, std::set<State> > bitMap = it->second;
+		std::map<BitVector, std::set<State> >::iterator bitIt;
+		for(bitIt = bitMap.begin(); bitIt != bitMap.end(); ++bitIt){
+			BitVector vec = bitIt->first;
+			if(vec.find(variable) != vec.end()){
+				std::map<BitVector, std::set<State> > bit = it->second;
+				std::set<State> nextS = bitIt->second;
+				bit.erase(vec);
+				vec.erase(variable);
+				bit[vec] = nextS;
+				transitions[it->first] = bit;
+			}
+		}
+	}
 }
 
+// makes the given FA deterministic
 void Automaton::makeDeterministic(Automaton& fa){
 	std::queue<std::set<State> > remain;
 	std::map<std::set<State>, int> stateMap;
 	std::map<BitVector, std::set<State> > transf; 
 	std::set<BitVector> bitSet;
 	std::set<BitVector>::iterator it;
-	std::set<State> nextf, Q, nextQ;
+	std::set<State> Q, nextf;
 	std::set<State>::iterator Qit, itf;
 	int i = 0;
 
@@ -215,34 +244,48 @@ void Automaton::makeDeterministic(Automaton& fa){
 	stateMap.insert(std::make_pair(fa.initialStates, i));
 	markInitial(i);
 	remain.push(fa.initialStates);
-
+	std::cout << " A " << std::endl;
 	while(!remain.empty()){
 		Q = remain.front();
+		remain.pop();
 		auto state = stateMap.find(Q)->second;
 		addState(state);
 		if(fa.check_intersect(Q)){
 			markFinal(i);
 		}
 		for(it = bitSet.begin(); it != bitSet.end(); ++it){
+			std::set<State> nextQ;
 			for(Qit = Q.begin(); Qit != Q.end(); ++Qit){
-				transf = fa.transitions.find(*Qit)->second;
-				nextf = transf.find(*it)->second;
-				for(itf = nextf.begin(); itf != nextf.end(); ++itf){
-					nextQ.insert(*itf);
+				auto trans = fa.transitions.find(*Qit);
+				if(trans != fa.transitions.end()){
+					transf = trans->second;
+					auto nexta = transf.find(*it);
+					if(nexta != transf.end()){
+
+						nextf = nexta->second;
+						for(itf = nextf.begin(); itf != nextf.end(); ++itf){
+							nextQ.insert(*itf);
+						}
+					}
 				}
 			}
-			auto next = stateMap.find(nextQ);
-			if(next == stateMap.end()){
-				i++;
-				stateMap.insert(std::make_pair(nextQ, i));
-				remain.push(nextQ);
+			if(!nextQ.empty()){
+				auto next = stateMap.find(nextQ);
+				if(next == stateMap.end()){
+					i++;
+					stateMap.insert(std::make_pair(nextQ, i));
+					remain.push(nextQ);
+				}
+				printStates(std::cout, Q);
+				next = stateMap.find(nextQ);
+				addTransition(state, *it, next->second);
 			}
-			next = stateMap.find(nextQ);
-			addTransition(state, *it, next->second);
 		}
 	}
+	std::cout << " D " << std::endl;
 }
 
+// checks if checkstates intersects with finalstates
 bool Automaton::check_intersect(std::set<State> checkStates){
 	std::set<State>::iterator checkit;
 	for(checkit = checkStates.begin(); checkit != checkStates.end(); ++checkit){
@@ -253,9 +296,10 @@ bool Automaton::check_intersect(std::set<State> checkStates){
 			}
 		}
 	}
-
 	return false;
 }
+
+// prints all the states
 void Automaton::printStates(std::ostream &str, const std::set<State> s) {
 	str << "{";
 	for(auto& st : s) {
@@ -265,25 +309,21 @@ void Automaton::printStates(std::ostream &str, const std::set<State> s) {
 
 }
 
-
+// puts the states you can reach from your current states with the given BitSet to your current states
 void Automaton::next(const BitVector input){
 	std::set<State>::iterator itcur;
 	std::set<State> nextStates;
-
 	for(itcur = currentStates.begin(); itcur != currentStates.end(); itcur++){
 		std::set<State> next = transitions[*itcur][input];
-
 		std::set<State>::iterator itnext;
 		for(itnext = next.begin(); itnext != next.end(); itnext++){
 			nextStates.insert(*itnext);
 		}
 	}
-
 	currentStates = nextStates;
-
-
 }
 
+// prints all the transitions of the automata
 void Automaton::printTransitionLabel(std::ostream &str, const BitVector t) {
 	str << "{";
 	for(auto& bv : t) {
@@ -292,6 +332,7 @@ void Automaton::printTransitionLabel(std::ostream &str, const BitVector t) {
 	str << "}";
 }
 
+// prints the automata
 void Automaton::print(std::ostream &str) const {
 	str << "Initial States: ";
 	printStates(str, initialStates);
@@ -300,20 +341,13 @@ void Automaton::print(std::ostream &str) const {
 	str << "Current States: ";
 	printStates(str, currentStates);
 	str <<"\nTransitions: \n";
-
 	for (auto& trans : transitions) {
 		for(auto& m : trans.second) {
 			str << "(";
-
-            // print label of source state
 			str << trans.first;
 			str << ", ";
-
-            // print label of transition
 			printTransitionLabel(str, m.first);
 			str << ", ";
-
-            // print target states
 			printStates(str, m.second);
 			str << ")\n";
 		}
@@ -321,3 +355,14 @@ void Automaton::print(std::ostream &str) const {
 }
 
 
+// eliminate empty transitions
+void Automaton::eliminateLambda(Automaton& fa){
+	reset();
+
+	State initial = 0;
+	addState(initial);
+	markInitial(initial);
+	markFinal(initial);
+
+
+}
