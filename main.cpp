@@ -12,12 +12,60 @@
  * Datastructuren Assignment 3
 **/
 
-Automaton createAutomaton(ExprTree * exptree){
+Automaton createAutomaton(ExprTree * exprtree){
     Automaton theAuto;
-    //theAuto.createAutomaton(exptree);
-    // TODO (voor studenten in deel 2): Bouw de Presburger automaat door de meegegeven syntaxtree exptree van de formule te doorlopen
-		
-
+    std::queue<State> states;
+    std::set<State>::iterator statesit;
+    std::map<unsigned,int> pres;
+    std::map<unsigned,int>::iterator presit;
+    std::set<BitVector> bits;
+    std::set<BitVector>::iterator bititSet;
+    BitVector bitcurr;
+    std::map<unsigned, bool>::iterator bitit;
+    State statecurr;
+    int b, checkb = 0, state = 0;
+    
+    theAuto.addState(state);
+    theAuto.markInitial(state);
+    theAuto.markFinal(state);
+    states.push(state);
+    
+    if(exprtree->getPresburgerMap(pres, b)){
+        theAuto.makeBitSet(pres.size(), bits);
+        bititSet = bits.begin();
+        bitcurr = *bititSet;
+        for(unsigned int i = 0; i < pres.size(); i++){
+            theAuto.addToAlphabet(i);
+        }
+        while(!states.empty()){
+            statecurr = states.front();
+            theAuto.addState(statecurr);
+            states.pop();
+            for(bititSet = bits.begin(); bititSet != bits.end(); ++bititSet){
+                bitcurr = *bititSet;
+                for(bitit = bitcurr.begin(); bitit != bitcurr.end(); ++bitit){
+                    presit = pres.find(bitit->first);
+                    if(presit != pres.end()){
+                        checkb += presit->second * bitit->second;
+                    }
+                    else{
+                        std::cout << "Wrong bitmap." << std::endl;
+                    }
+                }
+                if(checkb%2 == b){
+                    state = (b-checkb)/2;
+                    if(!theAuto.hasState(state)){
+                        theAuto.addState(state);
+                        states.push(state);
+                    }
+                    theAuto.addTransition(statecurr, bitcurr, state);
+                }
+            }
+        }
+    }
+    else{
+        std::cout << "Wrong expression tree." << std::endl;
+    }
     return theAuto;
 }
 

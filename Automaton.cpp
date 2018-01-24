@@ -6,47 +6,14 @@
  * Datastructuren Assignment 3
 */
 
-/*
-State Automaton::getState(){
-	return state;
-}
 
-State Automaton::getState(){
-	return state;
-}
-
-void Automaton::createAutomaton(ExprTree * exptree){
-	std::set<State>::iterator statesit;
-	std::map<unsigned,int> pres;
-	std::map<unsigned,int>::iterator presit;
-	std::set<BitVector> bits;
-	std::set<BitVector>::iterator bitit;
-	BitVector bitcurr;
-	State statecurr;
-	int b, checkb = 0, state = 0;
-	markInitial(state);
-	
-	if(exptree->getPresburgerMap(pres, b)){
-		makeBitSet(pres.size(), bits);
-		for(statesit = states.begin();statesit != states.end();statesit++){
-			statecurr = *statesit;
-			for(bitit = bits.begin(); bitit != bits.end(); bitit++){
-				bitcurr = *bitit;
-				for(int i = 0; i < pres.size(); i++){
-					presit = pres.find(bitcurr[i]);
-					if(presit != pres.end()){
-						checkb += presit->second *bitcurr.find(i)->second;
-					}
-				}
-				if(checkb%2 == b){
-					if(states.find(b-checkb) != states.end()){
-						addTransition(statecurr, bitcurr, checkb);
-					}
-				}
-			}
-		}
+bool Automaton::hasState(State state){
+	std::set<State>::iterator it = states.find(state);
+	if(it == states.end()){
+		return false;
 	}
-}*/
+	return true;
+}
 
 // resets current automaton
 void Automaton::reset(){

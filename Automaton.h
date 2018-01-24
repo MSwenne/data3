@@ -23,7 +23,11 @@ typedef int State;
 class Automaton {
 	public:
 		
-		//void createAutomaton(ExprTree* exp);
+		/**
+		* checks if automaton has the state
+		*/
+		bool hasState(State state);
+
 
 		/**
 		* resets current automaton
