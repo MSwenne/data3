@@ -107,6 +107,7 @@ class ExprTree : public binarytree<expr>{
 
 
 bool ExprTree::getPresburgerMap(std::map<unsigned,int>& pres, int& b){
+
 	if(getRoot()->getData().type == expr::EQUALS)
 		return getPresburgerMapRecursive(getRoot(), 1, pres,b);
 	return false;

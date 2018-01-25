@@ -162,10 +162,10 @@ int Automaton::setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<Sta
 void Automaton::makeBitSet(int length, std::set<BitVector> &result){
 	BitVector bv1;
 	BitVector bv2;
-	bv1[0] = 0;
-	bv2[0] = 1;
-	makeBitSet_p(length, 1, bv1, result);
-	makeBitSet_p(length, 1, bv2, result);
+	bv1[1] = 0;
+	bv2[1] = 1;
+	makeBitSet_p(length, 2, bv1, result);
+	makeBitSet_p(length, 2, bv2, result);
 }
 
 // helper function for makeBitSet
@@ -175,7 +175,7 @@ void Automaton::makeBitSet_p(int length, int i, BitVector bv, std::set<BitVector
 	bv1[i] = 0;
 	bv2[i] = 1;
 	i++;
-	if(length == i) {
+	if(length+1 == i) {
 		result.insert(bv1);
 		result.insert(bv2);
 	}
@@ -343,6 +343,8 @@ void Automaton::printTransitionLabel(std::ostream &str, const BitVector t) {
 
 // prints the automata
 void Automaton::print(std::ostream &str) const {
+	str << "All States: ";
+	printStates(str, states);
 	str << "Initial States: ";
 	printStates(str, initialStates);
 	str << "Final States: ";
