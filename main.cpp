@@ -39,7 +39,7 @@ Automaton createAutomaton_A(ExprTree * exprtree, Automaton & theAuto){
 
 
 		theAuto.makeBitSet(bits);
-				std::cout << "b BABLABLA = " << b << std::endl;
+		std::cout << "b BABLABLA = " << b << std::endl;
 
 		bititSet = bits.begin();
 		bitcurr = *bititSet;
@@ -80,7 +80,7 @@ Automaton createAutomaton_A(ExprTree * exprtree, Automaton & theAuto){
 			}
 		}
 		theAuto.markFinal(0);
-	
+
 	}
 	else{
 		std::cout << "Wrong expression tree." << std::endl;
@@ -88,16 +88,40 @@ Automaton createAutomaton_A(ExprTree * exprtree, Automaton & theAuto){
 	return theAuto;
 }
 
+void checkAlphabet(Automaton & theAuto1, Automaton & theAuto2){
+	std::set<unsigned> alphabet1 = theAuto1.getAlphabet();
+	std::set<unsigned> alphabet2 = theAuto2.getAlphabet();
+
+	if(alphabet1 != alphabet2){
+		std::set<unsigned>::iterator it1;
+		std::set<unsigned>::iterator it2;
+		for(it1 = alphabet1.begin(); it1 != alphabet1.end(); ++it1){
+			it2 = alphabet2.find(*it1);
+			if(it2 == alphabet2.end()){
+				std::cout << " ADDING " << *it1 << std::endl;
+				theAuto2.addToAlphabet(*it1);
+			}
+		}
+		for(it2 = alphabet2.begin(); it2 != alphabet2.end(); ++it2){
+			it1 = alphabet1.find(*it2);
+			if(it1 == alphabet1.end()){
+				std::cout << " ADDING " << *it2 << std::endl;
+
+				theAuto1.addToAlphabet(*it2);
+			}
+		}
+	}
+}
+
 Automaton createAutomaton(ExprTree *exprtree){
 	Automaton theAuto;
+	Automaton theAuto2;
+	Automaton theAuto3;
 
 	if(exprtree->getRoot()->getData().type == expr::EQUALS){
 		return createAutomaton_A(exprtree, theAuto);
 	}
 	else if(exprtree->getRoot()->getData().type == expr::EXISTS){
-		Automaton theAuto2;
-		Automaton theAuto3;
-
 		std::cout << "Exist " << std::endl;
 
 		unsigned proj;
@@ -110,37 +134,45 @@ Automaton createAutomaton(ExprTree *exprtree){
 			exprtree->setRoot(exprtree->getRoot()->getLeft());
 		}
 		else{
-					std::cout << "WRONG " << std::endl;
+			std::cout << "WRONG " << std::endl;
 
 		}
 		theAuto3 = createAutomaton_A(exprtree, theAuto2);
-							theAuto3.print(std::cout);
 		theAuto3.project(proj);
 		theAuto.makeDeterministic(theAuto3);
 
 	}
 	else if(exprtree->getRoot()->getData().type == expr::AND){
-		Automaton theAuto2;
-		Automaton theAuto3;
-
 		node<expr>* right = exprtree->getRoot()->getRight();
 		node<expr>* left = exprtree->getRoot()->getLeft();
 		exprtree->setRoot(right);
 		createAutomaton_A(exprtree, theAuto2);
+
 		exprtree->setRoot(left);
 		createAutomaton_A(exprtree, theAuto3);
+		
 
+		checkAlphabet(theAuto2, theAuto3);
+		theAuto2.print(std::cout);
+		theAuto3.print(std::cout);
 		theAuto.intersect(theAuto2, theAuto3);
 
 	}
 	else if(exprtree->getRoot()->getData().type == expr::NOT){
-		Automaton theAuto2;
+		exprtree->setRoot(exprtree->getRoot()->getLeft());
 		createAutomaton_A(exprtree, theAuto2);
-		theAuto.complement(theAuto2);
+		theAuto2.print(std::cout);
+
+		theAuto3.makeDeterministic(theAuto2);
+
+		theAuto.complement(theAuto3);
+		theAuto3.print(std::cout);
+
 	}
 	
 	return theAuto;
 }
+
 
 
 void addVarToBitVectors(std::list<BitVector> &l, const unsigned index, int val) {

@@ -25,6 +25,11 @@ void Automaton::reset(){
 	transitions = newTransitions;
 	currentStates = newCurrentstates;
 }
+
+std::set<unsigned> Automaton::getAlphabet(){
+	return alphabet;
+}
+
 void Automaton::setAlphabet(std::set<unsigned> newAlphabet){
 	alphabet = newAlphabet;
 }
@@ -97,6 +102,7 @@ bool Automaton::inFinalState() const{
 
 // makes an intersection automata of the two given automata
 void Automaton::intersect(Automaton& fa1, Automaton& fa2){
+
 	std::set<BitVector> bitSet;
 	std::pair<State, State> pairs;
 	std::pair<State, State> nextpair;
@@ -107,38 +113,42 @@ void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 	std::set<State>::iterator itf1, itf2;
 	std::set<BitVector>::iterator it;
 	
-	makeBitSet(bitSet);
+	fa1.makeBitSet(bitSet);
 	int i = setInitial(fa1, fa2, stateMap, remain);
+
 	while(!remain.empty()){
 		pairs = remain.front();
 		auto state = stateMap.find(pairs)->second;
 		addState(state);
 		remain.pop();
-		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() || 
-			fa2.finalStates.find(pairs.second)!=fa2.finalStates.end()){
+		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() || fa2.finalStates.find(pairs.second)!=fa2.finalStates.end()){
 			markFinal(stateMap[pairs]);
-	}
-	for(it = bitSet.begin(); it != bitSet.end(); ++it){
-		transf1 = fa1.transitions.find(pairs.first)->second;
-		transf2 = fa2.transitions.find(pairs.second)->second;
-		nextf1 = transf1.find(*it)->second;
-		nextf2 = transf2.find(*it)->second;
-		for(itf1 = nextf1.begin(); itf1 != nextf1.end(); ++itf1){
-			for(itf2 = nextf2.begin(); itf2 != nextf2.end(); ++itf2){
-				nextpair.first = *itf1;
-				nextpair.second = *itf2;
-				auto next = stateMap.find(nextpair);
-				if(next == stateMap.end()){
-					stateMap.insert(std::make_pair(nextpair, i));
-					i++;
-					remain.push(nextpair);
-				}	
-				next = stateMap.find(nextpair);
-				addTransition(state, *it, next->second);
+		}
+
+		for(it = bitSet.begin(); it != bitSet.end(); ++it){
+			transf1 = fa1.transitions.find(pairs.first)->second;
+			transf2 = fa2.transitions.find(pairs.second)->second;
+			if(transf1.find(*it) != transf1.end() && transf2.find(*it) != transf2.end()){
+				nextf1 = transf1.find(*it)->second;
+				nextf2 = transf2.find(*it)->second;
+				for(itf1 = nextf1.begin(); itf1 != nextf1.end(); ++itf1){
+					for(itf2 = nextf2.begin(); itf2 != nextf2.end(); ++itf2){
+						nextpair.first = *itf1;
+						nextpair.second = *itf2;
+						auto next = stateMap.find(nextpair);
+						if(next == stateMap.end()){
+							stateMap.insert(std::make_pair(nextpair, i));
+							i++;
+							remain.push(nextpair);
+						}	
+						next = stateMap.find(nextpair);
+						addTransition(state, *it, next->second);
+					}
+				}
 			}
 		}
 	}
-}
+
 }
 
 // makes a map of initial state pairs and their new state value
@@ -221,13 +231,22 @@ void Automaton::addToAlphabet(unsigned varnr){
 		newtransitions.insert(std::make_pair(origstate, newtrans));
 	}
 	transitions = newtransitions;
+	alphabet.insert(varnr);
 }
 
 // makes the complement of the given FA
 void Automaton::complement(Automaton& fa){
-	std::set<State> copyInitial = initialStates;
-	initialStates = finalStates;
-	finalStates = copyInitial;
+	states = fa.states;
+	initialStates = fa.initialStates;
+	transitions = fa.transitions;
+	alphabet = fa.alphabet;
+	std::set<State> allstates = fa.states;
+	std::set<State>::iterator it;
+	for(it = allstates.begin(); it != allstates.end(); ++it){
+		if(fa.finalStates.find(*it) == fa.finalStates.end()){
+			markFinal(*it);
+		}
+	}
 }
 
 // deletes the given variable from the automata
@@ -247,9 +266,6 @@ void Automaton::project(const unsigned variable){
 				transitions[it->first] = bit;
 			}
 		}
-	}
-	if(transitions.size() == 0){
-
 	}
 }
 
@@ -271,7 +287,7 @@ void Automaton::makeDeterministic(Automaton& fa){
 		std::set<State>::iterator Qit, itf;
 		int i = 0;
 
-		makeBitSet(bitSet);
+		fa.makeBitSet(bitSet);
 		stateMap.insert(std::make_pair(fa.initialStates, i));
 		markInitial(i);
 		remain.push(fa.initialStates);

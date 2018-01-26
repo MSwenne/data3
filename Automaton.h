@@ -26,6 +26,11 @@ class Automaton {
 		* sets alphabet to newAlphabet
 		*/
 		void setAlphabet(std::set<unsigned> newAlphabet);
+		
+		/**
+		* getter for alphabet
+		*/
+		std::set<unsigned> getAlphabet();
 
 		/**
 		* checks if automaton has the state
