@@ -10,12 +10,33 @@
  * Datastructuren Assignment 3
 **/
 
+// checks on mod for createAutomaton
+bool modTest(Automaton & theAuto, int checkb, int b, int & state, std::queue<State> & states){
+	if(std::abs(checkb%2) == b%2){
+		state = (b-checkb)/2;
+		if(!theAuto.hasState(state)){
+			theAuto.addState(state);
+			states.push(state);
+		}
+		return true;
+	}
+	return false;
+}
 
+// adds alphabet of pres to automaton
+void addAlphabet(Automaton & theAuto, std::map<unsigned,int> pres){
+	std::set<unsigned> newAlphabet;
 
+	std::map<unsigned,int>::iterator presit;
+	for(presit = pres.begin(); presit != pres.end(); ++presit){
+		newAlphabet.insert(presit->first);
+	}
+	theAuto.setAlphabet(newAlphabet);
+}
+
+// creates automaton when root of exprtree is EQUAL
 Automaton createAutomaton_A(ExprTree * exprtree, Automaton & theAuto){
 	std::queue<State> states;
-	std::set<State>::iterator statesit;
-	std::set<unsigned> newAlphabet;
 	std::map<unsigned,int> pres;
 	std::map<unsigned,int>::iterator presit;
 	std::set<BitVector> bits;
@@ -29,23 +50,14 @@ Automaton createAutomaton_A(ExprTree * exprtree, Automaton & theAuto){
 		theAuto.addState(b);
 		theAuto.markInitial(b);
 		states.push(b);
-		std::cout << "b BABLABLA = " << b << std::endl;
 		
-		for(presit = pres.begin(); presit != pres.end(); ++presit){
-			std::cout << "addToAlphabet = " << presit->first << std::endl;
-			newAlphabet.insert(presit->first);
-		}
-		theAuto.setAlphabet(newAlphabet);
-
-
+		addAlphabet(theAuto, pres);
 		theAuto.makeBitSet(bits);
-		std::cout << "b BABLABLA = " << b << std::endl;
 
 		bititSet = bits.begin();
 		bitcurr = *bititSet;
 		while(!states.empty()){
 			statecurr = states.front();
-			std::cout << statecurr << std::endl;
 
 			b = statecurr;
 			states.pop();
@@ -54,40 +66,22 @@ Automaton createAutomaton_A(ExprTree * exprtree, Automaton & theAuto){
 				bitcurr = *bititSet;
 				for(bitit = bitcurr.begin(); bitit != bitcurr.end(); ++bitit){
 					presit = pres.find(bitit->first);
-					std::cout << " wa " << bitit->first << std::endl;
 					if(presit != pres.end()){
-						std::cout << " a = " << presit->second << " x = " << bitit->second << " wa " << bitit->first << std::endl;
-
 						checkb += presit->second * bitit->second;
-						std::cout << "checkb: " << checkb << std::endl;
-					}
-					else{
-						std::cout << "Wrong bitmap." << std::endl;
 					}
 				}
-				//std::cout << "end bitit || b = " << b << " checkb " << checkb << std::endl;
-				//std::cout << " checkb mod 2 " << checkb%2 << std::endl;
-				if(std::abs(checkb%2) == b%2){
-					state = (b-checkb)/2;
-					if(!theAuto.hasState(state)){
-						std::cout << "ADDING " << state << std::endl;
-						theAuto.addState(state);
-						states.push(state);
-					}
-					//std::cout << "Trans " << statecurr << " To " << state << std::endl; 
+				if(modTest(theAuto, checkb, b, state, states)){
 					theAuto.addTransition(statecurr, bitcurr, state);
 				}
+
 			}
 		}
 		theAuto.markFinal(0);
-
-	}
-	else{
-		std::cout << "Wrong expression tree." << std::endl;
 	}
 	return theAuto;
 }
 
+// Checks if automaton 1 and 2 have same alphabet, and if not add new var to alphabet to fix
 void checkAlphabet(Automaton & theAuto1, Automaton & theAuto2){
 	std::set<unsigned> alphabet1 = theAuto1.getAlphabet();
 	std::set<unsigned> alphabet2 = theAuto2.getAlphabet();
@@ -98,79 +92,90 @@ void checkAlphabet(Automaton & theAuto1, Automaton & theAuto2){
 		for(it1 = alphabet1.begin(); it1 != alphabet1.end(); ++it1){
 			it2 = alphabet2.find(*it1);
 			if(it2 == alphabet2.end()){
-				std::cout << " ADDING " << *it1 << std::endl;
 				theAuto2.addToAlphabet(*it1);
 			}
 		}
 		for(it2 = alphabet2.begin(); it2 != alphabet2.end(); ++it2){
 			it1 = alphabet1.find(*it2);
 			if(it1 == alphabet1.end()){
-				std::cout << " ADDING " << *it2 << std::endl;
-
 				theAuto1.addToAlphabet(*it2);
 			}
 		}
 	}
 }
 
+// makes automaton for quantification
+Automaton createExists(ExprTree *exprtree){
+	Automaton theAuto;
+	Automaton theAuto2;
+	Automaton theAuto3;		
+	unsigned proj;
+	if(exprtree->getRoot()->getLeft()->getData().type == expr::VARIABLE){
+		proj = exprtree->getRoot()->getLeft()->getData().variable;
+		exprtree->setRoot(exprtree->getRoot()->getRight());
+	}
+	else if (exprtree->getRoot()->getRight()->getData().type == expr::VARIABLE){
+		proj = exprtree->getRoot()->getRight()->getData().variable;
+		exprtree->setRoot(exprtree->getRoot()->getLeft());
+	}
+	
+	theAuto3 = createAutomaton_A(exprtree, theAuto2);
+	theAuto3.project(proj);
+	theAuto.makeDeterministic(theAuto3);
+	return theAuto;
+}
+
+// makes automaton for Logic conjunction
+Automaton createAnd(ExprTree *exprtree){
+	Automaton theAuto;
+	Automaton theAuto2;
+	Automaton theAuto3;
+	node<expr>* right = exprtree->getRoot()->getRight();
+	node<expr>* left = exprtree->getRoot()->getLeft();
+	exprtree->setRoot(right);
+	createAutomaton_A(exprtree, theAuto2);
+
+	exprtree->setRoot(left);
+	createAutomaton_A(exprtree, theAuto3);
+
+	checkAlphabet(theAuto2, theAuto3);
+	theAuto.intersect(theAuto2, theAuto3);
+	return theAuto;
+}
+
+// makes automaton for negation
+Automaton createNot(ExprTree *exprtree){
+	Automaton theAuto;
+	Automaton theAuto2;
+	Automaton theAuto3;
+	exprtree->setRoot(exprtree->getRoot()->getLeft());
+	createAutomaton_A(exprtree, theAuto2);
+	theAuto3.makeDeterministic(theAuto2);
+	theAuto.complement(theAuto3);
+	
+	return theAuto;
+}
+
+// main function createAutomaton
+// checks on root
 Automaton createAutomaton(ExprTree *exprtree){
 	Automaton theAuto;
 	Automaton theAuto2;
 	Automaton theAuto3;
 
-	if(exprtree->getRoot()->getData().type == expr::EQUALS){
-		return createAutomaton_A(exprtree, theAuto);
-	}
-	else if(exprtree->getRoot()->getData().type == expr::EXISTS){
-		std::cout << "Exist " << std::endl;
-
-		unsigned proj;
-		if(exprtree->getRoot()->getLeft()->getData().type == expr::VARIABLE){
-			proj = exprtree->getRoot()->getLeft()->getData().variable;
-			exprtree->setRoot(exprtree->getRoot()->getRight());
-		}
-		else if (exprtree->getRoot()->getRight()->getData().type == expr::VARIABLE){
-			proj = exprtree->getRoot()->getRight()->getData().variable;
-			exprtree->setRoot(exprtree->getRoot()->getLeft());
-		}
-		else{
-			std::cout << "WRONG " << std::endl;
-
-		}
-		theAuto3 = createAutomaton_A(exprtree, theAuto2);
-		theAuto3.project(proj);
-		theAuto.makeDeterministic(theAuto3);
-
+	// depending on root we return the right Automaton
+	if(exprtree->getRoot()->getData().type == expr::EXISTS){
+		return createExists(exprtree);
 	}
 	else if(exprtree->getRoot()->getData().type == expr::AND){
-		node<expr>* right = exprtree->getRoot()->getRight();
-		node<expr>* left = exprtree->getRoot()->getLeft();
-		exprtree->setRoot(right);
-		createAutomaton_A(exprtree, theAuto2);
-
-		exprtree->setRoot(left);
-		createAutomaton_A(exprtree, theAuto3);
-		
-
-		checkAlphabet(theAuto2, theAuto3);
-		theAuto2.print(std::cout);
-		theAuto3.print(std::cout);
-		theAuto.intersect(theAuto2, theAuto3);
-
+		return createAnd(exprtree);
 	}
 	else if(exprtree->getRoot()->getData().type == expr::NOT){
-		exprtree->setRoot(exprtree->getRoot()->getLeft());
-		createAutomaton_A(exprtree, theAuto2);
-		theAuto2.print(std::cout);
-
-		theAuto3.makeDeterministic(theAuto2);
-
-		theAuto.complement(theAuto3);
-		theAuto3.print(std::cout);
-
+		return createNot(exprtree);
 	}
 	
-	return theAuto;
+	return createAutomaton_A(exprtree, theAuto);
+
 }
 
 
