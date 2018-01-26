@@ -22,7 +22,11 @@ typedef int State;
 
 class Automaton {
 	public:
-		
+		/**
+		* sets alphabet to newAlphabet
+		*/
+		void setAlphabet(std::set<unsigned> newAlphabet);
+
 		/**
 		* checks if automaton has the state
 		*/
@@ -83,12 +87,12 @@ class Automaton {
 		* Makes a set of BitVectors which contains every possible BitVector you can make with the 
 		* given alphabet (so you can loop over every BitVector)
 		*/
-		void makeBitSet(int length, std::set<BitVector>& result);
+		void makeBitSet(std::set<BitVector>& result);
 
 		/**
 		* a recursive helper function for makeBitSet
 		*/
-		void makeBitSet_p(int lentgh, int i, BitVector bv, std::set<BitVector>& result);
+		void makeBitSet_p(std::set<unsigned>::iterator it, BitVector bv, std::set<BitVector>& result);
 	
 		/**
 		* Replace every bitvector in the transitions with two new bitvectors that additionally contain the new variable varnr:

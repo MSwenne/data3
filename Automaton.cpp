@@ -25,6 +25,9 @@ void Automaton::reset(){
 	transitions = newTransitions;
 	currentStates = newCurrentstates;
 }
+void Automaton::setAlphabet(std::set<unsigned> newAlphabet){
+	alphabet = newAlphabet;
+}
 
 // adds a new state to the automata
 void Automaton::addState(const State state){
@@ -104,7 +107,7 @@ void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 	std::set<State>::iterator itf1, itf2;
 	std::set<BitVector>::iterator it;
 	
-	makeBitSet(fa1.alphabet.size(), bitSet);
+	makeBitSet(bitSet);
 	int i = setInitial(fa1, fa2, stateMap, remain);
 	while(!remain.empty()){
 		pairs = remain.front();
@@ -159,29 +162,36 @@ int Automaton::setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<Sta
 }
 
 // makes a set of every possible BitSet you can make with an alphabet of given length
-void Automaton::makeBitSet(int length, std::set<BitVector> &result){
-	BitVector bv1;
-	BitVector bv2;
-	bv1[1] = 0;
-	bv2[1] = 1;
-	makeBitSet_p(length, 2, bv1, result);
-	makeBitSet_p(length, 2, bv2, result);
+void Automaton::makeBitSet(std::set<BitVector> &result){
+	std::set<unsigned>::iterator it;
+		std::cout << "Alphabet size " << alphabet.size() << std::endl;
+
+	it = alphabet.begin();
+
+	if(it != alphabet.end()){
+		BitVector bv1;
+		BitVector bv2;
+		makeBitSet_p(it, bv1, result);
+		makeBitSet_p(it, bv2, result);
+	}
 }
 
 // helper function for makeBitSet
-void Automaton::makeBitSet_p(int length, int i, BitVector bv, std::set<BitVector> &result){
+void Automaton::makeBitSet_p(std::set<unsigned>::iterator it, BitVector bv, std::set<BitVector> &result){
+	
+	std::cout << "Alphabet number " << *it << std::endl;
 	BitVector bv1 = bv;
 	BitVector bv2 = bv;
-	bv1[i] = 0;
-	bv2[i] = 1;
-	i++;
-	if(length+1 == i) {
+	bv1[*it] = 0;
+	bv2[*it] = 1;
+	++it;
+	if(it != alphabet.end()) {
 		result.insert(bv1);
 		result.insert(bv2);
 	}
 	else {
-		makeBitSet_p(length, i, bv1, result);
-		makeBitSet_p(length, i, bv2, result);
+		makeBitSet_p(it, bv1, result);
+		makeBitSet_p(it, bv2, result);
 	}
 }
 
@@ -249,7 +259,7 @@ void Automaton::makeDeterministic(Automaton& fa){
 	std::set<State>::iterator Qit, itf;
 	int i = 0;
 
-	makeBitSet(fa.alphabet.size(), bitSet);
+	makeBitSet(bitSet);
 	stateMap.insert(std::make_pair(fa.initialStates, i));
 	markInitial(i);
 	remain.push(fa.initialStates);
