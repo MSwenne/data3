@@ -79,7 +79,7 @@ Automaton createAutomaton_A(ExprTree * exprtree, Automaton & theAuto){
 				}
 			}
 		}
-		theAuto.markFinal(b);
+		theAuto.markFinal(0);
 	
 	}
 	else{
@@ -95,7 +95,9 @@ Automaton createAutomaton(ExprTree *exprtree){
 		return createAutomaton_A(exprtree, theAuto);
 	}
 	else if(exprtree->getRoot()->getData().type == expr::EXISTS){
-				Automaton theAuto2;
+		Automaton theAuto2;
+		Automaton theAuto3;
+
 		std::cout << "Exist " << std::endl;
 
 		unsigned proj;
@@ -111,10 +113,10 @@ Automaton createAutomaton(ExprTree *exprtree){
 					std::cout << "WRONG " << std::endl;
 
 		}
-		theAuto = createAutomaton_A(exprtree, theAuto2);
-							theAuto.print(std::cout);
-
-		theAuto.project(proj);
+		theAuto3 = createAutomaton_A(exprtree, theAuto2);
+							theAuto3.print(std::cout);
+		theAuto3.project(proj);
+		theAuto.makeDeterministic(theAuto3);
 
 	}
 	else if(exprtree->getRoot()->getData().type == expr::AND){

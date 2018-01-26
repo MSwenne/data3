@@ -117,28 +117,28 @@ void Automaton::intersect(Automaton& fa1, Automaton& fa2){
 		if(fa1.finalStates.find(pairs.first)!=fa1.finalStates.end() || 
 			fa2.finalStates.find(pairs.second)!=fa2.finalStates.end()){
 			markFinal(stateMap[pairs]);
-		}
-		for(it = bitSet.begin(); it != bitSet.end(); ++it){
-			transf1 = fa1.transitions.find(pairs.first)->second;
-			transf2 = fa2.transitions.find(pairs.second)->second;
-			nextf1 = transf1.find(*it)->second;
-			nextf2 = transf2.find(*it)->second;
-			for(itf1 = nextf1.begin(); itf1 != nextf1.end(); ++itf1){
-				for(itf2 = nextf2.begin(); itf2 != nextf2.end(); ++itf2){
-					nextpair.first = *itf1;
-					nextpair.second = *itf2;
-					auto next = stateMap.find(nextpair);
-					if(next == stateMap.end()){
-						stateMap.insert(std::make_pair(nextpair, i));
-						i++;
-						remain.push(nextpair);
-					}	
-					next = stateMap.find(nextpair);
-					addTransition(state, *it, next->second);
-				}
+	}
+	for(it = bitSet.begin(); it != bitSet.end(); ++it){
+		transf1 = fa1.transitions.find(pairs.first)->second;
+		transf2 = fa2.transitions.find(pairs.second)->second;
+		nextf1 = transf1.find(*it)->second;
+		nextf2 = transf2.find(*it)->second;
+		for(itf1 = nextf1.begin(); itf1 != nextf1.end(); ++itf1){
+			for(itf2 = nextf2.begin(); itf2 != nextf2.end(); ++itf2){
+				nextpair.first = *itf1;
+				nextpair.second = *itf2;
+				auto next = stateMap.find(nextpair);
+				if(next == stateMap.end()){
+					stateMap.insert(std::make_pair(nextpair, i));
+					i++;
+					remain.push(nextpair);
+				}	
+				next = stateMap.find(nextpair);
+				addTransition(state, *it, next->second);
 			}
 		}
 	}
+}
 }
 
 // makes a map of initial state pairs and their new state value
@@ -164,7 +164,7 @@ int Automaton::setInitial(Automaton& fa1, Automaton& fa2, std::map<std::pair<Sta
 // makes a set of every possible BitSet you can make with an alphabet of given length
 void Automaton::makeBitSet(std::set<BitVector> &result){
 	std::set<unsigned>::iterator it;
-		std::cout << "Alphabet size " << alphabet.size() << std::endl;
+	std::cout << "Alphabet size " << alphabet.size() << std::endl;
 
 	it = alphabet.begin();
 
@@ -185,7 +185,9 @@ void Automaton::makeBitSet_p(std::set<unsigned>::iterator it, BitVector bv, std:
 	bv1[*it] = 0;
 	bv2[*it] = 1;
 	++it;
-	if(it != alphabet.end()) {
+	if(it == alphabet.end()) {
+		std::cout << "get here? " << *it << std::endl;
+
 		result.insert(bv1);
 		result.insert(bv2);
 	}
@@ -246,62 +248,73 @@ void Automaton::project(const unsigned variable){
 			}
 		}
 	}
+	if(transitions.size() == 0){
+
+	}
 }
 
 // makes the given FA deterministic
 void Automaton::makeDeterministic(Automaton& fa){
-	std::queue<std::set<State> > remain;
-	std::map<std::set<State>, int> stateMap;
-	std::map<BitVector, std::set<State> > transf; 
-	std::set<BitVector> bitSet;
-	std::set<BitVector>::iterator it;
-	std::set<State> Q, nextf;
-	std::set<State>::iterator Qit, itf;
-	int i = 0;
+	std::cout << "size  " << fa.transitions.size()  << std::endl;
 
-	makeBitSet(bitSet);
-	stateMap.insert(std::make_pair(fa.initialStates, i));
-	markInitial(i);
-	remain.push(fa.initialStates);
-	std::cout << " A " << std::endl;
-	while(!remain.empty()){
-		Q = remain.front();
-		remain.pop();
-		auto state = stateMap.find(Q)->second;
-		addState(state);
-		if(fa.check_intersect(Q)){
-			markFinal(i);
-		}
-		for(it = bitSet.begin(); it != bitSet.end(); ++it){
-			std::set<State> nextQ;
-			for(Qit = Q.begin(); Qit != Q.end(); ++Qit){
-				auto trans = fa.transitions.find(*Qit);
-				if(trans != fa.transitions.end()){
-					transf = trans->second;
-					auto nexta = transf.find(*it);
-					if(nexta != transf.end()){
+	if(hasEpsilon(fa)){
+		std::cout << "eliminateLambda " << std::endl;
+		eliminateLambda(fa); 
+	}
+	else{
+		std::queue<std::set<State> > remain;
+		std::map<std::set<State>, int> stateMap;
+		std::map<BitVector, std::set<State> > transf; 
+		std::set<BitVector> bitSet;
+		std::set<BitVector>::iterator it;
+		std::set<State> Q, nextf;
+		std::set<State>::iterator Qit, itf;
+		int i = 0;
 
-						nextf = nexta->second;
-						for(itf = nextf.begin(); itf != nextf.end(); ++itf){
-							nextQ.insert(*itf);
+		makeBitSet(bitSet);
+		stateMap.insert(std::make_pair(fa.initialStates, i));
+		markInitial(i);
+		remain.push(fa.initialStates);
+		std::cout << " A " << std::endl;
+		while(!remain.empty()){
+			Q = remain.front();
+			remain.pop();
+			auto state = stateMap.find(Q)->second;
+			addState(state);
+			if(fa.check_intersect(Q)){
+				markFinal(i);
+			}
+			for(it = bitSet.begin(); it != bitSet.end(); ++it){
+				std::set<State> nextQ;
+				for(Qit = Q.begin(); Qit != Q.end(); ++Qit){
+					auto trans = fa.transitions.find(*Qit);
+					if(trans != fa.transitions.end()){
+						transf = trans->second;
+						auto nexta = transf.find(*it);
+						if(nexta != transf.end()){
+
+							nextf = nexta->second;
+							for(itf = nextf.begin(); itf != nextf.end(); ++itf){
+								nextQ.insert(*itf);
+							}
 						}
 					}
 				}
-			}
-			if(!nextQ.empty()){
-				auto next = stateMap.find(nextQ);
-				if(next == stateMap.end()){
-					i++;
-					stateMap.insert(std::make_pair(nextQ, i));
-					remain.push(nextQ);
+				if(!nextQ.empty()){
+					auto next = stateMap.find(nextQ);
+					if(next == stateMap.end()){
+						i++;
+						stateMap.insert(std::make_pair(nextQ, i));
+						remain.push(nextQ);
+					}
+					printStates(std::cout, Q);
+					next = stateMap.find(nextQ);
+					addTransition(state, *it, next->second);
 				}
-				printStates(std::cout, Q);
-				next = stateMap.find(nextQ);
-				addTransition(state, *it, next->second);
 			}
 		}
+		std::cout << " D " << std::endl;
 	}
-	std::cout << " D " << std::endl;
 }
 
 // checks if checkstates intersects with finalstates
@@ -375,15 +388,32 @@ void Automaton::print(std::ostream &str) const {
 	}
 }
 
+bool Automaton::hasEpsilon(Automaton& fa){
+	std::map<State, std::map<BitVector, std::set<State> > >::iterator it;
+	it = fa.transitions.begin();
+	std::map<BitVector, std::set<State> > bitMap = it->second;
+	std::map<BitVector, std::set<State> >::iterator bitIt;
+	bitIt = bitMap.begin();
+	BitVector vec = bitIt->first;
+	if(vec.size() == 0){
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
+
+
 
 // eliminate empty transitions
 void Automaton::eliminateLambda(Automaton& fa){
-	reset();
-
-	State initial = 0;
-	addState(initial);
-	markInitial(initial);
-	markFinal(initial);
-
+	if(transitions.size() == 0){
+		reset();
+		State initial = 0;
+		addState(initial);
+		markInitial(initial);
+		markFinal(initial);
+	}
 
 }

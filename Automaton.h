@@ -31,7 +31,11 @@ class Automaton {
 		* checks if automaton has the state
 		*/
 		bool hasState(State state);
-
+		
+		/**
+		* checks if automaton has an empty transition
+		*/
+		bool hasEpsilon(Automaton& fa);
 
 		/**
 		* resets current automaton
@@ -122,6 +126,7 @@ class Automaton {
 		* Make automata fa deterministic, eliminate epsilon transitions, and store the result in the current automaton
 		*/
 		void makeDeterministic(Automaton& fa);
+
 
 		/**
 		* checks of checkStates intersects with finalStates
